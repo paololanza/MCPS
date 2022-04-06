@@ -24,18 +24,13 @@
 
   
 int inputPin = 27;   // choose the input pin (for PIR sensor)
-int samples = 100;
-int values[100];
 int light = 0;
-int numRichieste = 0;
 int startTime = 0;
 int endTime = 0;
 int elapsed = 0;
 volatile int timeOff = 30000;
 int hour = 0;
 HTTPClient http;
-
-
 
 boolean trovato = false;
 
@@ -62,100 +57,40 @@ void setup() {
  */
   setDebugMessageLevel(2);
   ArduinoCloud.printDebugInfo();
-  
-  /*
-  String res = http.begin("http://worldtimeapi.org/api/timezone/Europe/Rome");
-  http.GET();
-  JSONObject root = jsonBuffer.parseObject(res);
-  http.end();
-  hour = root ["main"]["datetime"];
-  Serial.print("Hour: ");
-  Serial.println(hour);
-  */
-
 }
 
 void loop() {
   ArduinoCloud.update();
   startTime = millis();
   val = digitalRead(inputPin);
-  if(enabled){
-  /*
-  val = digitalRead(inputPin);
-  Serial.println(val);
-  Serial.print("Light:");
-  Serial.println(light);
-  
-  //Aggiornamento dei valori precedenti (Shift a destra)
-  for (int i = samples-2; i >= 0; i--){
-    values[i+1] = values[i];
-  }
-  
-  //values[numRichieste % samples] = val;
-  
-  //Assegnamento dell'ultimo valore registrato dal sensore alla prima posizione di values
-  //values[0] = val;
-  
-  int count = 0;
-  for (int i = 0; i < samples; i++){
-    count += values[i];
-  }
-  Serial.print("Array:[");
-  for(int i = 0; i < samples; i++){
-    Serial.print(values[i]);
-    Serial.print(", ");
-  }
-  Serial.println("]");
-  
-  Serial.print("Count:");
-  Serial.println(count);
-  if (count == 0 && light == 1){
-      Serial.println("ON to OFF");
-      lightOff();
-      light = 0;
-      numRichieste = 0;
-  }
-  
-  if (count >= 1 && light == 0){
-    Serial.println("OFF to ON");
-    lightOn();
-    light = 1;
-  }
-  
-  // Your code here 
-  //delay(100);
-  
-  numRichieste++;
-  }*/
-  
-  //elapsed = endTime - startTime;
-  elapsed = startTime - endTime;
-  endTime = millis();
-  Serial.print("Tempo exec: ");
-  Serial.println(elapsed);
-  if(val == 0)
+  if(enabled)
   {
-    timeOff -= elapsed;
-    if(timeOff <= 0 && light == 1)
+    elapsed = startTime - endTime;
+    endTime = millis();
+    Serial.print("Tempo exec: ");
+    Serial.println(elapsed);
+    if(val == 0)
     {
-      lightOff();
-      light = 0;
+      timeOff -= elapsed;
+      if(timeOff <= 0 && light == 1)
+      {
+        lightOff();
+        light = 0;
+      }
     }
-  }
-  else
-  {
-    timeOff = 30000;
-    if(light == 0)
+    else
     {
-      lightOn();
-      light = 1;
+      timeOff = 30000;
+      if(light == 0)
+      {
+        lightOn();
+        light = 1;
+      }
     }
-  }
-  Serial.print("Timer: ");
-  Serial.println(timeOff);
-  delay(25);
-  //endTime = millis();
-  }
+    Serial.print("Timer: ");
+    Serial.println(timeOff);
+    //delay(25);
+    }
 }
 
 void lightOn(){
